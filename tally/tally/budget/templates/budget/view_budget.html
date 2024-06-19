@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Tally - How Much Money Is Left in the Budget?</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <!-- css -->
+    <style>
+        body {
+        font-size: 2em;
+        font-family: Helvetica;
+        color: #27476E;
+        }
+
+        select {
+        font-size: 1em;
+        border: 1px solid black;
+        color: #27476E;
+        }
+
+        button {
+        font-size: 1em;
+        border-radius: 20px;
+        padding: 10px;
+        color: white;
+        background-image: linear-gradient(to top, #27476E, #006992);
+        box-shadow: 0 15px 15px 0 rgba(0, 0, 0, 0.1);
+        margin-top: 0.5em;
+        }
+
+        button:hover {
+        background-image: linear-gradient(to top, #006992, #6583a9);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        }
+
+        #remaining {
+            text-align: center;
+        }
+
+        #inline {
+        display: inline-flex;
+        text-align: center;
+        }
+
+        @keyframes flipUp {
+        from {
+            transform: rotateX(90deg);
+        }
+        to {
+            transform: rotateX(0deg);
+        }
+        }
+
+        #large-dollar {
+        color: #006992;
+        font-weight: bold;
+        font: Calibri;
+        font-size: 3em;
+        animation: flipUp 0.8s cubic-bezier(0.68, 0.68, 0.26, 1.55).4s both;
+        }
+
+        #dollar {
+        color: #006992;
+        font-weight: bold;
+        padding-top: 0.2em;
+        }
+
+        #transaction_form {
+        display: inline-flex;
+                flex-direction: column;
+        }
+
+            
+        #remaining-text {
+                margin-top: 0.5em;
+                text-align: center;
+                color: #27476E;
+        }
+
+        #value {
+                margin-top: 0.5em;
+                font-size: 1em;
+                border: 1px solid black;
+                color: #27476E;
+        }
+
+        .centered-area {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 90vh;
+                max-width: 1200px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Transaction Form -->
+    <!-- select dropdown that, when changed, fetches the amount remaining for that category -->
+    <div class="centered-area">
+        <!-- <img src="media/Tally.png" alt="Tally Logo" /> -->
+        <form id="transaction_form" hx-post="{% url 'view_budget' %}" hx-target="#transaction_form" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+            <select name="category" id="category" hx-get="{% url 'remaining_budget' %}" hx-target="#remaining" hx-trigger="load, click">
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <div id="remaining"></div>
+            <input type="number" name="value" id="value" />
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+
+</html>
