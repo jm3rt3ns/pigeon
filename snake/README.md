@@ -1,6 +1,13 @@
 # SNAKE 🐍
 
 ✨✨[Demo](https://jm3rt3ns.github.io/pigeon/snake/)✨✨
+
+# Instructions
+1. use arrow keys to move the green snake
+1. hit the red snack to grow your snake
+1. avoid colliding with your own segments
+1. try to create the longest snake possible!
+
 # Background
 I wrote the initial version of the classic game of snake in a night (~3 hours)
 
