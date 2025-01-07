@@ -1,10 +1,11 @@
 # SNAKE 🐍
 
-# To run locally:
-```python3 -m http.server 8000```
-
+✨✨[Demo](https://jm3rt3ns.github.io/pigeon/snake/)✨✨
 # Background
 I wrote the initial version of the classic game of snake in a night (~3 hours)
+
+# To run locally:
+```python3 -m http.server 8000```
 
 # Architecture:
 * queue-type data structure for moving the snake and adding/removing segments
