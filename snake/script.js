@@ -1,5 +1,3 @@
-console.log("EHRE")
-
 const GAMESPEED = 0.1 // this is a percent of 1 second and defines how long it takes for the snack to travel between grid pieces of the board
 const HEIGHT_OF_SEGMENT_X = 25;
 const HEIGHT_OF_SEGMENT_Y = 25;
@@ -19,7 +17,6 @@ function getRandomInt(max) {
 }
 
 function getVelocity(playerDirection) {
-    console.log('playerDirection', playerDirection);
     switch (playerDirection) {
         case Directions.North:
             return [0,-1];
@@ -37,7 +34,6 @@ function getVelocity(playerDirection) {
 function drawSegment(x, y, delta, playerDirection) {
 
     const velocity = getVelocity(playerDirection);
-    console.log('velocity', velocity);
     // const smoothedX = velocity[0] * delta;
     // const smoothedY = velocity[1] * delta;
     const segment = document.createElement("div");
@@ -75,7 +71,6 @@ class Game {
     tick = 0;
 
     constructor() {
-        console.log('creating a new game');
         this.handleKeypress = this.handleKeypress.bind(this);
         document.addEventListener('keyup', this.handleKeypress);
 
@@ -93,8 +88,6 @@ class Game {
 
     // handle direction change
     handleKeypress(event) {
-        console.log(`event.code '${event.code}'`);
-
         switch (event.code) {
             case 'ArrowDown':
                 this.playerDirection = Directions.South;
@@ -139,10 +132,7 @@ class Game {
         // this will be floor((current time - start time) / gamespeed). If this is greater than the current tick, then we advance the tick as well as move the snake, check for collisions, etc.
         const gameTime = (Date.now() - this.gameStartTime) / 1000 / GAMESPEED;
         let delta = 0;
-        console.log('delta', delta);
-        // console.log('gameTime', gameTime);
         if (Math.floor(gameTime) > this.tick) {
-            console.log('this.playerDirection', this.playerDirection);
             const velocity = getVelocity(this.playerDirection);
             let xPosition = (this.snakeArray.at(-1).x + velocity[0]) % BOARD_SIZE_X;
             let yPosition = (this.snakeArray.at(-1).y + velocity[1]) % BOARD_SIZE_Y;
@@ -153,18 +143,14 @@ class Game {
             if (xPosition < 0) {
                 xPosition+=BOARD_SIZE_X;
             }
-            console.log('ypos', yPosition);
             this.snakeArray.push({ y: yPosition, x: xPosition });
             
             // check if there is a collision
             const snakeHead = this.snakeArray.at(-1);
-            console.log('this.snack, snakeHead', this.snack, snakeHead);
             if (this.snack.x === snakeHead.x && this.snack.y === snakeHead.y) {
-                console.log('collision!');
                 this.snack = { x: getRandomInt(BOARD_SIZE_X), y: getRandomInt(BOARD_SIZE_Y) };
             }
             else if (this.snakeArray.slice(0, this.snakeArray.length - 2).findIndex((val) => val.x === snakeHead.x && val.y === snakeHead.y) !== -1) {
-                console.log('self collision! game over');
                 const maxSnakeLength = this.snakeArray.length;
                 this.resetGame();
                 alert(`Game over. Your snake was ${maxSnakeLength} segments long`);
@@ -191,8 +177,6 @@ class Game {
             //     const deltaX = (segment.x - previousSegment.x) % 2;
             //     const deltaY = (segment.y - previousSegment.y) % 2;
 
-            //     console.log('deltaX, deltaY', deltaX, deltaY);
-
             //     if (deltaX === 1) {
             //         segmentDirection = Directions.East;
             //     } else if (deltaX === -1) {
@@ -204,7 +188,6 @@ class Game {
             //     }
             // }
 
-            // console.log('idx, segmentDirection', idx, segmentDirection);
 
             drawSegment(segment.x, segment.y, delta, segmentDirection);
         });
