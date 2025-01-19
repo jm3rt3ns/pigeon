@@ -6,10 +6,10 @@ const SNACK_COLOR = '#f54842';
 BOARD_SIZE_X = 20;
 BOARD_SIZE_Y = 20;
 const Directions = Object.freeze({
-    North:   Symbol("North"),
-    South:  Symbol("South"),
-    East:  Symbol("East"),
-    West:  Symbol("West"),
+    North: Symbol("North"),
+    South: Symbol("South"),
+    East: Symbol("East"),
+    West: Symbol("West"),
 });
 
 function getRandomInt(max) {
@@ -19,15 +19,15 @@ function getRandomInt(max) {
 function getVelocity(playerDirection) {
     switch (playerDirection) {
         case Directions.North:
-            return [0,-1];
+            return [0, -1];
         case Directions.South:
-            return [0,1];
+            return [0, 1];
         case Directions.West:
-            return [-1,0];
+            return [-1, 0];
         case Directions.East:
-            return [1,0];
+            return [1, 0];
         default:
-            return [0,0];
+            return [0, 0];
     }
 }
 
@@ -65,9 +65,9 @@ function drawSnack(x, y, gameId) {
 
 function uuidv4() {
     return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
-      (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+        (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
     );
-  }
+}
 
 
 class Game {
@@ -76,12 +76,20 @@ class Game {
     playerDirection = Directions.North;
     gameStartTime = null;
 
+    // gesture tracking (for mobile devices)
+    startX;
+    startY;
+
     snack = null;
     tick = 0;
 
     constructor() {
         this.handleKeypress = this.handleKeypress.bind(this);
+        this.handleTouchStart = this.handleTouchStart.bind(this);
+        this.handleTouchEnd = this.handleTouchEnd.bind(this);
         document.addEventListener('keyup', this.handleKeypress);
+        document.addEventListener('touchstart', this.handleTouchStart);
+        document.addEventListener('touchend', this.handleTouchEnd);
 
         const animate = () => {
             requestAnimationFrame((t) => animate(t));
@@ -115,6 +123,37 @@ class Game {
         }
     }
 
+    handleTouchStart(event) {
+        this.startX = event.touches[0].clientX;
+        this.startY = event.touches[0].clientY;
+    }
+
+    handleTouchEnd(event) {
+        const endX = event.changedTouches[0].clientX;
+        const endY = event.changedTouches[0].clientY;
+      
+        const diffX = endX - this.startX;
+        const diffY = endY - this.startY;
+      
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+          if (diffX > 0) {
+            // Swiped right
+            this.playerDirection = Directions.East;
+          } else {
+            // Swiped left
+            this.playerDirection = Directions.West;
+          }
+        } else {
+          if (diffY > 0) {
+            // Swiped down
+            this.playerDirection = Directions.South;
+          } else {
+            // Swiped up
+            this.playerDirection = Directions.North;
+          }
+        }
+      }
+
     resetGame() {
         this.snakeArray = [];
         this.playerDirection = Directions.North;
@@ -147,13 +186,13 @@ class Game {
             let yPosition = (this.snakeArray.at(-1).y + velocity[1]) % BOARD_SIZE_Y;
 
             if (yPosition < 0) {
-                yPosition+=BOARD_SIZE_Y;
+                yPosition += BOARD_SIZE_Y;
             }
             if (xPosition < 0) {
-                xPosition+=BOARD_SIZE_X;
+                xPosition += BOARD_SIZE_X;
             }
             this.snakeArray.push({ y: yPosition, x: xPosition });
-            
+
             // check if there is a collision
             const snakeHead = this.snakeArray.at(-1);
             if (this.snack.x === snakeHead.x && this.snack.y === snakeHead.y) {
@@ -168,8 +207,8 @@ class Game {
             }
             this.tick = this.tick + 1;
         }
-        
-        
+
+
         // draw!
         this.draw(0);
     }
