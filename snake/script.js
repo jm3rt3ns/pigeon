@@ -31,7 +31,7 @@ function getVelocity(playerDirection) {
     }
 }
 
-function drawSegment(x, y, delta, playerDirection) {
+function drawSegment(x, y, delta, playerDirection, gameId) {
 
     const velocity = getVelocity(playerDirection);
     // const smoothedX = velocity[0] * delta;
@@ -44,11 +44,12 @@ function drawSegment(x, y, delta, playerDirection) {
     segment.style.width = `${HEIGHT_OF_SEGMENT_X}px`;
     segment.style.height = `${HEIGHT_OF_SEGMENT_Y}px`;
     segment.className = 'snake-segment';
-    document.body.appendChild(segment);
+    const gameObject = document.getElementById(gameId);
+    gameObject.appendChild(segment);
     return segment;
 }
 
-function drawSnack(x, y) {
+function drawSnack(x, y, gameId) {
     const segment = document.createElement("div");
     segment.style.backgroundColor = SNACK_COLOR;
     segment.style.position = 'absolute';
@@ -57,12 +58,20 @@ function drawSnack(x, y) {
     segment.style.width = `${HEIGHT_OF_SEGMENT_X}px`;
     segment.style.height = `${HEIGHT_OF_SEGMENT_Y}px`;
     segment.id = 'snack';
-    document.body.appendChild(segment);
+    const gameObject = document.getElementById(gameId);
+    gameObject.appendChild(segment);
     return segment;
 }
 
+function uuidv4() {
+    return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+      (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+    );
+  }
+
 
 class Game {
+    id = uuidv4();
     snakeArray = [];
     playerDirection = Directions.North;
     gameStartTime = null;
@@ -166,33 +175,26 @@ class Game {
     }
 
     draw(delta) {
-        // clear the screen
-        document.body.innerHTML = '';
+        // create the gameboard if it doesn't exist and then clear the screen
+        if (document.getElementById(this.id) === null) {
+            let gameBoard = document.createElement('div');
+            gameBoard.className = "vine-box";
+            gameBoard.id = this.id;
+            gameBoard.style.position = 'absolute';
+            gameBoard.style.height = `${BOARD_SIZE_Y * HEIGHT_OF_SEGMENT_Y}px`;
+            gameBoard.style.width = `${BOARD_SIZE_X * HEIGHT_OF_SEGMENT_X}px`;
+            document.body.append(gameBoard);
+        }
+
+        document.getElementById(this.id).innerText = "";
 
         // iterate over the snakeArray and draw these
         let segmentDirection = this.playerDirection;
         this.snakeArray.forEach((segment, idx) => {
-            // check if the previous segment is defined and interpret the direction of the current segment, if so
-            // if (previousSegment) {
-            //     const deltaX = (segment.x - previousSegment.x) % 2;
-            //     const deltaY = (segment.y - previousSegment.y) % 2;
-
-            //     if (deltaX === 1) {
-            //         segmentDirection = Directions.East;
-            //     } else if (deltaX === -1) {
-            //         segmentDirection = Directions.West;
-            //     } else if (deltaY === 1) {
-            //         segmentDirection = Directions.South;
-            //     } else if (deltaY === -1) {
-            //         segmentDirection = Directions.North;
-            //     }
-            // }
-
-
-            drawSegment(segment.x, segment.y, delta, segmentDirection);
+            drawSegment(segment.x, segment.y, delta, segmentDirection, this.id);
         });
 
         // draw the snack
-        drawSnack(this.snack.x, this.snack.y);
+        drawSnack(this.snack.x, this.snack.y, this.id);
     }
 }

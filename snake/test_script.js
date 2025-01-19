@@ -11,19 +11,24 @@ function assertNotEqual(x, y) {
 }
 
 function testCode() {
+    // call the game cycle function and ensure the snake moves
+    g = new Game();
+
     // ensure createLink(x,y) returns a div element at the specified location
-    const result = drawSegment(1,1,0,Directions.North); // each div is 50,50, so at the position (1,1), the div starts at (50, 50)
+    const result = drawSegment(1,1,0,Directions.North, g.id); // each div is 50,50, so at the position (1,1), the div starts at (50, 50)
     assertEqual(result.offsetLeft, 25);
     assertEqual(result.offsetTop, 25);
     result.remove();
 
     // // test 2
-    const result2 = drawSnack(0, 0);
+    const result2 = drawSnack(0, 0, g.id);
     assertEqual(result2.style.backgroundColor, 'rgb(245, 72, 66)');
     result2.remove();
 
-    // call the game cycle function and ensure the snake moves
-    g = new Game();
+    // assert the game object has an id (a guid that will be the id of the div where the game lives on the page)
+    assertNotEqual(g.id, undefined);
+
+    // check that things are rendering nicely
     g.cycle(0);
     const segment = document.querySelector('.snake-segment');
     const snack = document.getElementById('snack');

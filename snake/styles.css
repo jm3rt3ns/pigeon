@@ -1,0 +1,31 @@
+.vine-box {
+    position: relative;
+    padding: 30px;
+    margin: 40px;
+    background: black;
+    /* Create wavy border shape using clip-path */
+    clip-path: polygon(
+      0% 5%,
+      5% 0%,
+      25% 7%,
+      45% 0%,
+      65% 7%,
+      85% 0%,
+      95% 5%,
+      100% 25%,
+      93% 45%,
+      100% 65%,
+      93% 85%,
+      100% 95%,
+      95% 100%,
+      75% 93%,
+      55% 100%,
+      35% 93%,
+      15% 100%,
+      5% 95%,
+      0% 75%,
+      7% 55%,
+      0% 35%,
+      7% 15%
+    );
+  }
