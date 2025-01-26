@@ -217,15 +217,19 @@ class Game {
         // create the gameboard if it doesn't exist and then clear the screen
         if (document.getElementById(this.id) === null) {
             let gameBoard = document.createElement('div');
+            let highScore = document.createElement('div');
+            highScore.id = "high-score-box";
             gameBoard.className = "vine-box";
             gameBoard.id = this.id;
             gameBoard.style.position = 'absolute';
             gameBoard.style.height = `${BOARD_SIZE_Y * HEIGHT_OF_SEGMENT_Y}px`;
             gameBoard.style.width = `${BOARD_SIZE_X * HEIGHT_OF_SEGMENT_X}px`;
             document.body.append(gameBoard);
+            document.body.append(highScore);
         }
-
+        
         document.getElementById(this.id).innerText = "";
+        document.getElementById('high-score-box').innerText = this.snakeArray.length;
 
         // iterate over the snakeArray and draw these
         let segmentDirection = this.playerDirection;
