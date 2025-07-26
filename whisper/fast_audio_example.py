@@ -26,13 +26,14 @@ os.add_dll_directory("C:\\Program Files\\NVIDIA\\CUDNN\\v9.10\\bin\\12.9")
 model = WhisperModel(model_size, device="cuda", compute_type="float32")
 # model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
-temp_chunk = bytearray()
+temp_chunk = io.BytesIO()
 start_time = time.time()
 current_time = start_time
 five_seconds = 5
 
 
 def process_audio_chunk(input_bytes):
+    input_bytes.seek(0)
     start_time = time.time()
     # convert incoming data to whisper-friendly format:
     with io.BytesIO() as wav_file:
@@ -41,9 +42,8 @@ def process_audio_chunk(input_bytes):
             wav_writer.setframerate(RATE)
             wav_writer.setsampwidth(1)
             wav_writer.setnchannels(CHANNELS)
-            wav_writer.writeframes(input_bytes)
+            wav_writer.writeframes(input_bytes.read())
             wav_file.flush()
-            print(type(wav_file))
         finally:
             wav_writer.close()
 
@@ -54,7 +54,6 @@ def process_audio_chunk(input_bytes):
             language="en",
         )
         segments = result[0]
-        segments = []
 
         for segment in segments:
             print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
@@ -62,8 +61,10 @@ def process_audio_chunk(input_bytes):
         elapsed_time = stop_time - start_time
         print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
+
 previous_time = time.time()
 current_time = time.time()
+
 
 def callback(in_data, frame_count, time_info, status):
     # save off the new chunk of temp audio
@@ -72,18 +73,14 @@ def callback(in_data, frame_count, time_info, status):
     global temp_chunk
 
     current_time = time.time()
-    
-    if temp_chunk is not None:
-        temp_chunk.extend(in_data)
-    else:
-        # Handle the case where temp_chunk is None, perhaps by initializing it
-        temp_chunk = bytearray(in_data)
+
+    temp_chunk.write(in_data)
     # check whether 5 seconds has passed
     delta = abs(current_time - previous_time)
     if delta > five_seconds:
         print("processing")
         process_audio_chunk(temp_chunk)
-        temp_chunk = []
+        temp_chunk.truncate()
         # update the "previous time" so that we wait another interval
         previous_time = current_time
     return (None, pyaudio.paContinue)
