@@ -11,6 +11,8 @@ import sys
 
 import pyaudio
 
+SKIP_MODEL = False
+DEBUG = False
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1 if sys.platform == "darwin" else 2
@@ -23,7 +25,8 @@ os.add_dll_directory(
 os.add_dll_directory("C:\\Program Files\\NVIDIA\\CUDNN\\v9.10\\bin\\12.9")
 # C:\Program Files\NVIDIA\CUDNN\v9.10\bin\12.9
 # Run on GPU with FP16
-model = WhisperModel(model_size, device="cuda", compute_type="float32")
+if not SKIP_MODEL:
+    model = WhisperModel(model_size, device="cuda", compute_type="float32")
 # model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
 temp_chunk = io.BytesIO()
@@ -40,7 +43,7 @@ def process_audio_chunk(input_bytes):
         wav_writer = wave.open(wav_file, "wb")
         try:
             wav_writer.setframerate(RATE)
-            wav_writer.setsampwidth(1)
+            wav_writer.setsampwidth(2) # this is a magic number
             wav_writer.setnchannels(CHANNELS)
             wav_writer.writeframes(input_bytes.read())
             wav_file.flush()
@@ -49,17 +52,23 @@ def process_audio_chunk(input_bytes):
 
         wav_file.seek(0)
 
-        result = model.transcribe(
-            wav_file,
-            language="en",
-        )
-        segments = result[0]
+        if DEBUG:
+            with open("temp.wav", "wb") as f:
+                f.write(wav_file.read())
+            wav_file.seek(0)
 
-        for segment in segments:
-            print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
-        stop_time = time.time()
-        elapsed_time = stop_time - start_time
-        print(f"Elapsed time: {elapsed_time:.2f} seconds")
+        if not SKIP_MODEL:
+            result = model.transcribe(
+                wav_file,
+                language="en",
+            )
+            segments = result[0]
+
+            for segment in segments:
+                print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+            stop_time = time.time()
+            elapsed_time = stop_time - start_time
+            print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
 
 previous_time = time.time()
