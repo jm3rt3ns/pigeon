@@ -1,6 +1,4 @@
-from datetime import datetime, timedelta
 import io
-from textwrap import indent
 from faster_whisper import WhisperModel
 import time
 
@@ -22,7 +20,7 @@ RECORD_SECONDS = 5
 os.add_dll_directory(
     "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.9\\bin"
 )
-os.add_dll_directory("C:\\Program Files\\NVIDIA\\CUDNN\\v9.10\\bin\\12.9")
+os.add_dll_directory("C:\\Program Files\\NVIDIA\\CUDNN\\v9.10\\bin\\11.8")
 # C:\Program Files\NVIDIA\CUDNN\v9.10\bin\12.9
 # Run on GPU with FP16
 if not SKIP_MODEL:
