@@ -1,1 +1,3 @@
-whisper test files\Abide with Me\Abide_With_Me_Guitar_and_Vox.mp3 --model turbo
+```
+python fast_audio_example.py
+```
