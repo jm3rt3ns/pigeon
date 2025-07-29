@@ -413,9 +413,6 @@ Capabilities:
                     self.log_message("about to put audio chunk in queue")
                     try:
                         self.transcription_queue.put_nowait(audio_chunk)
-                        self.log_message(
-                            f"queue size: {self.transcription_queue.qsize}"
-                        )
                     except queue.Full:
                         self.log_message("Queue is full")
                         pass  # Skip if queue is full
