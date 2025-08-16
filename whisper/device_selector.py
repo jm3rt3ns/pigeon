@@ -4,16 +4,39 @@ Audio Device Selector GUI
 A Tkinter GUI for selecting audio devices and managing callback-based audio streams.
 """
 
+import io
 import os
 import queue
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
+import wave
 from faster_whisper import WhisperModel
 import pyaudio
 import numpy as np
 import threading
 import time
 from queue import Queue, Empty
+
+
+def save_as_wav(wav_file, audio_chunk, sample_rate, channels, logger=print):
+    logger("opening wave file")
+    wav_writer = wave.open(wav_file, "wb")
+    try:
+        wav_writer.setframerate(sample_rate)
+        wav_writer.setsampwidth(1)  # this is a magic number
+        wav_writer.setnchannels(channels)
+        wav_writer.writeframes(audio_chunk)
+        wav_file.flush()
+    finally:
+        wav_writer.close()
+
+    logger("saving the wav file")
+    wav_file.seek(0)
+
+    with open("temp.wav", "wb") as f:
+        f.write(wav_file.read())
+    wav_file.seek(0)
+
 
 model_size = "small"
 
@@ -45,7 +68,7 @@ class AudioDeviceGUI:
         self.transcription_queue = queue.Queue()
         self.transcription_thread = None
         self.audio_buffer = []
-        self.buffer_duration = 100.0  # seconds of audio to buffer before transcription
+        self.buffer_duration = 50.0  # seconds of audio to buffer before transcription
         self.sample_rate = 16000  # Whisper prefers 16kHz
         self.channels = 1
         self.transcription_active = False
@@ -444,15 +467,26 @@ Capabilities:
                     if audio_chunk is not None and len(audio_chunk) > 0:
                         self.log_message("Transcribing...")
                         # Normalize audio
-                        audio_chunk = audio_chunk / np.max(np.abs(audio_chunk) + 1e-10)
+                        # audio_chunk = audio_chunk / np.max(np.abs(audio_chunk) + 1e-10)
+
+                        # with io.BytesIO() as wav_file:
+                        #     save_as_wav(
+                        #         wav_file,
+                        #         audio_chunk,
+                        #         self.sample_rate,
+                        #         self.channels,
+                        #         self.logger,
+                        #     )
+
+                        self.log_message("about to start transciption")
 
                         # Transcribe audio
                         segments, info = self.whisper_model.transcribe(
                             audio_chunk,
-                            # beam_size=1,  # Faster processing
-                            # best_of=1,
-                            # temperature=0.0,
-                            # vad_filter=True,  # Voice activity detection
+                            beam_size=1,  # Faster processing
+                            best_of=1,
+                            temperature=0.0,
+                            vad_filter=True,  # Voice activity detection
                             # vad_parameters=dict(min_silence_duration_ms=1000),
                         )
 
@@ -472,7 +506,7 @@ Capabilities:
                             )
 
                 except queue.Empty:
-                    self.log_message("error transcribing")
+                    self.log_message("...")
                     continue  # Timeout, check if still active
                 except Exception as e:
                     self.log_message(f"Transcription error: {e}")
