@@ -34,7 +34,6 @@ def test_wav_file_sounds_correct():
     
 
     transcription_text = ""
-
     start_time = time.time()
     for segment in segments:
         transcription_text += segment.text.strip()
@@ -43,5 +42,4 @@ def test_wav_file_sounds_correct():
     elapsed_time = stop_time - start_time
     print(f"Elapsed time: {elapsed_time:.2f} seconds")
 
-    print(transcription_text)
     assert "I need thy presence" in transcription_text
